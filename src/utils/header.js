@@ -19,11 +19,37 @@ function formatChapterTitle(vol, num, name, tocFormat, customTocFormat, hideChap
   // Пользовательский формат - галочки не работают
   if (tocFormat === 'custom') {
     if (customTocFormat) {
-      return customTocFormat
-        .replace('{vol}', volStr)
-        .replace('{num}', numStr)
-        .replace('{name}', nameStr)
-        .trim();
+      // Обрабатываем секции в квадратных скобках
+      let result = customTocFormat;
+
+      // Сначала обрабатываем экранирование: \[ → [, \] → ]
+      result = result.replace(/\\\[/g, '\x00').replace(/\\\]/g, '\x01');
+
+      // Заменяем плейсхолдеры везде (и внутри скобок, и снаружи)
+      result = result.replace('{vol}', volStr).replace('{num}', numStr).replace('{name}', nameStr);
+
+      // Шаг 1: Удаляем пустые секции с разделителями вокруг
+      // Ищем: ~ [] ~ или ~ [] или [] ~
+      result = result.replace(/([^\w\s])\s*\[\s*\]\s*([^\w\s])/g, '$1$2');
+      result = result.replace(/([^\w\s])\s*\[\s*\]$/, '$1');
+      result = result.replace(/^\s*\[\s*\]\s*([^\w\s])/, '$1');
+
+      // Шаг 2: Убираем квадратные скобки из оставшихся секций
+      result = result.replace(/\[/g, '').replace(/\]/g, '');
+
+      // Шаг 3: Удаляем разделитель + пробелы в конце строки
+      result = result.replace(/([^\w\s])\s+$/, '$1');
+
+      // Шаг 4: Удаляем пробелы + разделитель в начале строки
+      result = result.replace(/^\s+([^\w\s])/, '$1');
+
+      // Шаг 5: Схлопываем дубликаты разделителей (2+ одинаковых неалфавитных символов подряд)
+      result = result.replace(/([^\w\s])\1+/g, '$1');
+
+      // Восстанавливаем экранированные скобки
+      result = result.replace(/\x00/g, '[').replace(/\x01/g, ']');
+
+      return result.trim();
     }
     // Fallback если custom формат пустой
     return `Том ${volStr}. Глава ${numStr}.${nameStr ? ' ' + nameStr : ''}`.trim();

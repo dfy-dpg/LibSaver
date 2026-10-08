@@ -19,6 +19,19 @@ function displayVersion() {
   }
 }
 
+// Обновление примера пользовательского формата
+function updateCustomFormatExample() {
+  const customFormat = document.getElementById('custom-toc-format').value;
+  const hideChapterName = document.getElementById('hide-chapter-name').checked;
+  const hideVolumeNumber = document.getElementById('hide-volume-number').checked;
+  const exampleElement = document.getElementById('custom-toc-format-example');
+
+  if (exampleElement && typeof formatChapterTitle === 'function') {
+    const example = formatChapterTitle('4', '31', 'Ёрико', 'custom', customFormat, hideChapterName, hideVolumeNumber);
+    exampleElement.textContent = example;
+  }
+}
+
 // Функция сохранения темы
 async function saveTheme(theme) {
   await chrome.storage.local.set({ theme });
@@ -264,7 +277,7 @@ function applySettingsToUI(settings) {
 
   // TOC format settings
   document.getElementById('toc-format').value = settings.tocFormat || 'default';
-  document.getElementById('custom-toc-format').value = settings.customTocFormat || 'Том {vol} Глава {num} {name}';
+  document.getElementById('custom-toc-format').value = settings.customTocFormat || '~ [Том {vol}] ~ [Глава {num}] ~ [{name}] ~';
   document.getElementById('hide-chapter-name').checked = settings.hideChapterName || false;
   document.getElementById('hide-volume-number').checked = settings.hideVolumeNumber || false;
 
@@ -273,6 +286,9 @@ function applySettingsToUI(settings) {
 
   // Show/hide custom format field and disable/enable checkboxes
   updateTocFormatFields();
+
+  // Update custom format example
+  updateCustomFormatExample();
 
   // Save original option texts
   saveOriginalOptionTexts();
@@ -614,13 +630,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateResizeMethodVisibility();
   updateJpegQualityFieldVisibility();
   updatePdfJpegQualityFieldVisibility();
-  
+
   // TOC format change handler
   document.getElementById('toc-format').addEventListener('change', updateTocFormatFields);
-  
+
+  // Custom format input change handler
+  document.getElementById('custom-toc-format').addEventListener('input', updateCustomFormatExample);
+
   // Checkbox change handlers for visual option updates
-  document.getElementById('hide-chapter-name').addEventListener('change', updateTocOptionTexts);
-  document.getElementById('hide-volume-number').addEventListener('change', updateTocOptionTexts);
+  document.getElementById('hide-chapter-name').addEventListener('change', () => {
+    updateTocOptionTexts();
+    updateCustomFormatExample();
+  });
+  document.getElementById('hide-volume-number').addEventListener('change', () => {
+    updateTocOptionTexts();
+    updateCustomFormatExample();
+  });
 
   // Показать/скрыть ссылки сайтов при изменении чекбокса
   document.getElementById('enable-site-menu').addEventListener('change', updateSiteMenuLinksVisibility);
@@ -651,11 +676,13 @@ function updateTocFormatFields() {
   const customField = document.getElementById('custom-toc-format-field');
   const hideChapterNameCheckbox = document.getElementById('hide-chapter-name');
   const hideVolumeNumberCheckbox = document.getElementById('hide-volume-number');
-  
+
   if (tocFormat === 'custom') {
     customField.style.display = 'flex';
     // Блокируем галочки при пользовательском формате
     hideChapterNameCheckbox.disabled = true;
+    // Обновляем пример при открытии поля
+    updateCustomFormatExample();
     hideVolumeNumberCheckbox.disabled = true;
   } else {
     customField.style.display = 'none';
@@ -838,7 +865,7 @@ const DEFAULT_SETTINGS_BY_GROUP = {
   toc: {
     'disable-toc': false,
     'toc-format': 'default',
-    'custom-toc-format': 'Том {vol} Глава {num} {name}',
+    'custom-toc-format': '~ [Том {vol}] ~ [Глава {num}] ~ [{name}] ~',
     'hide-chapter-name': false,
     'hide-volume-number': false
   },
@@ -903,6 +930,7 @@ function resetGroupSettings(group) {
 
     // Обновляем видимость полей после сброса
     updateTocFormatFields();
+    updateCustomFormatExample();
 
     // Отправляем сообщение для обновления полей в редакторе оглавления
     chrome.runtime.sendMessage({ action: 'tocSettingsReset', settings: defaults });
@@ -1073,7 +1101,7 @@ document.getElementById('btn-reset').addEventListener('click', async () => {
     },
     debugLogging: false,
     tocFormat: 'default',
-    customTocFormat: '',
+    customTocFormat: '~ [Том {vol}] ~ [Глава {num}] ~ [{name}] ~',
     hideChapterName: false,
     hideVolumeNumber: false,
     pdfImageFormat: 'original-png',

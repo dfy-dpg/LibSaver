@@ -5,6 +5,16 @@ body {
   min-height: 400px;
 }
 
+.field-example {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
 .container {
   gap: 12px;
   max-width: 600px;
