@@ -222,6 +222,7 @@ class Fb2Formatter extends BaseFormatter {
       });
 
       // Проверяем, что контент не пустой
+      const noHeaders = this.options.settings?.tocFormat === 'no_headers';
       if (!chapterXml || chapterXml.trim() === '') {
         if (this.options.addLog) {
           this.options.addLog(`Предупреждение: Глава "${ch.displayTitle}" имеет пустой контент`, true);
@@ -229,7 +230,12 @@ class Fb2Formatter extends BaseFormatter {
         // Добавляем пустую секцию с пометкой
         fb2Content += `<section id="${chapterId}"><title><p>${this.escapeXml(ch.displayTitle)}</p></title><p>[Контент главы отсутствует]</p></section>`;
       } else {
-        fb2Content += `<section id="${chapterId}"><title><p>${this.escapeXml(ch.displayTitle)}</p></title>${chapterXml}</section>`;
+        // Если включен "Без заголовков" - убираем заголовок из <title>
+        if (noHeaders) {
+          fb2Content += `<section id="${chapterId}">${chapterXml}</section>`;
+        } else {
+          fb2Content += `<section id="${chapterId}"><title><p>${this.escapeXml(ch.displayTitle)}</p></title>${chapterXml}</section>`;
+        }
       }
 
       if (this.options.updateProgress) {
@@ -318,14 +324,20 @@ class Fb2Formatter extends BaseFormatter {
       return '';
     }
 
+    const noHeaders = this.options.settings?.tocFormat === 'no_headers';
+    // Если включен "Без заголовков" - не создаём оглавление
+    if (noHeaders) {
+      return '';
+    }
+
     let tocContent = '<section><title><p>Оглавление</p></title>';
-    
+
     for (let i = 0; i < chapters.length; i++) {
       const ch = chapters[i];
       const chapterId = `chapter_${i}`;
       tocContent += `<p><a l:href="#${chapterId}">${this.escapeXml(ch.displayTitle)}</a></p>`;
     }
-    
+
     tocContent += '</section>';
     return tocContent;
   }

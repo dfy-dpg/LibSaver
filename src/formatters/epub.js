@@ -400,6 +400,7 @@ class EpubFormatter extends BaseFormatter {
       });
       
       const fileName = `chapter_${i + 1}.xhtml`;
+      const noHeaders = this.options.settings?.tocFormat === 'no_headers';
       const fullHtml = `<?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -407,7 +408,7 @@ class EpubFormatter extends BaseFormatter {
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 <body>
-    <h1>${ch.displayTitle}</h1>
+    ${noHeaders ? '' : `<h1>${ch.displayTitle}</h1>`}
     ${htmlContent}
 </body>
 </html>`;
@@ -643,6 +644,7 @@ class EpubFormatter extends BaseFormatter {
 
       // Создаем файл главы
       const fileName = `chapter_${i + 1}.xhtml`;
+      const noHeaders = this.options.settings?.tocFormat === 'no_headers';
       const fullHtml = `<?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -650,7 +652,7 @@ class EpubFormatter extends BaseFormatter {
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 <body>
-    <h1>${ch.displayTitle}</h1>
+    ${noHeaders ? '' : `<h1>${ch.displayTitle}</h1>`}
     <div class="manga-chapter">
 ${chapterHtml}
     </div>

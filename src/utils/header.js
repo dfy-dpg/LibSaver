@@ -42,6 +42,10 @@ function formatChapterTitle(vol, num, name, tocFormat, customTocFormat, hideChap
     case 'format3':
       title = `Том ${volStr} - Глава ${numStr} ${nameStr ? '- ' + nameStr : ''}`;
       break;
+    case 'no_headers':
+      // Без заголовков в контенте, но оставляем нормальный заголовок для UI/TOC
+      title = `Том ${volStr}. Глава ${numStr}.${nameStr ? ' ' + nameStr : ''}`;
+      break;
     case 'default':
     default:
       title = `Том ${volStr}. Глава ${numStr}.${nameStr ? ' ' + nameStr : ''}`;

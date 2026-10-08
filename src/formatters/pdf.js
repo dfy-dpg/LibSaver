@@ -656,20 +656,23 @@ class PdfFormatter extends BaseFormatter {
       let y = pageHeight - textMargin;
       const maxLineWidth = pageWidth - textMargin * 2;
 
-      // Заголовок главы с переносом
-      const chapterTitle = ch.displayTitle || `Глава ${i + 1}`;
-      const titleLines = this.wrapText(chapterTitle, maxLineWidth, fontSize + 2, boldFont);
-      for (const line of titleLines) {
-        page.drawText(line, {
-          x: textMargin,
-          y: y,
-          size: fontSize + 2,
-          font: boldFont,
-          color: rgb(0, 0, 0),
-        });
-        y -= fontSize + 2;
+      // Заголовок главы с переносом (если не отключен)
+      const noHeaders = this.options.settings?.tocFormat === 'no_headers';
+      if (!noHeaders) {
+        const chapterTitle = ch.displayTitle || `Глава ${i + 1}`;
+        const titleLines = this.wrapText(chapterTitle, maxLineWidth, fontSize + 2, boldFont);
+        for (const line of titleLines) {
+          page.drawText(line, {
+            x: textMargin,
+            y: y,
+            size: fontSize + 2,
+            font: boldFont,
+            color: rgb(0, 0, 0),
+          });
+          y -= fontSize + 2;
+        }
+        y -= fontSize;
       }
-      y -= fontSize;
 
       // Обрабатываем контент (исключаем img - они уже в base64 из convertJsonToHtml)
       const paragraphs = doc.querySelectorAll('p, h1, h2, h3, h4, h5, h6, div');

@@ -94,9 +94,12 @@ class TxtFormatter extends BaseFormatter {
           return String(num).padStart(4, '0');
         }
       });
-      
-      txtContent += `${ch.displayTitle}\n`;
-      txtContent += '-'.repeat(30) + '\n\n';
+
+      const noHeaders = this.options.settings?.tocFormat === 'no_headers';
+      if (!noHeaders) {
+        txtContent += `${ch.displayTitle}\n`;
+        txtContent += '-'.repeat(30) + '\n\n';
+      }
       txtContent += textContent + '\n\n';
 
       if (this.options.updateProgress) {
