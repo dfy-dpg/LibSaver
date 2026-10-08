@@ -1,0 +1,309 @@
+/* Стили для popup */
+
+body {
+  width: 400px;
+  min-height: auto;
+  max-height: 800px;
+  padding: var(--spacing-md);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.range-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.btn-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-top: var(--spacing-md);
+}
+
+.btn-group.hidden {
+  display: none;
+}
+
+.btn-edit {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn-edit:disabled {
+  cursor: default;
+}
+
+.btn-edit:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-hover);
+}
+
+.message-box {
+  text-align: center;
+  padding: var(--spacing-xl) 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.lib-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.lib-logo {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lib-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.message-text {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.message-text.error {
+  color: var(--danger-color);
+}
+
+.btn-redirect {
+  background-color: var(--accent-color);
+  color: var(--accent-text-color);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-redirect:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Кнопки для разных LIB сайтов */
+.btn-mangalib,
+.btn-hentailib,
+.btn-shlib,
+.btn-ranobelib,
+.btn-animelib {
+  width: 40px;
+  height: 40px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-mangalib:hover,
+.btn-hentailib:hover,
+.btn-shlib:hover,
+.btn-ranobelib:hover,
+.btn-animelib:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-hover);
+}
+
+/* Цвета SVG логотипов */
+.btn-mangalib .site-logo__corner {
+  fill: var(--manga-corner);
+}
+
+.btn-mangalib .site-logo__words {
+  fill: var(--logo-words);
+}
+
+.btn-hentailib .site-logo__corner {
+  fill: var(--hentai-corner);
+}
+
+.btn-hentailib .site-logo__words {
+  fill: var(--logo-words);
+}
+
+.btn-shlib .site-logo__corner {
+  fill: var(--slash-corner);
+}
+
+.btn-shlib .site-logo__words {
+  fill: var(--logo-words);
+}
+
+.btn-ranobelib .site-logo__corner {
+  fill: var(--ranobe-corner);
+}
+
+.btn-ranobelib .site-logo__words {
+  fill: var(--logo-words);
+}
+
+.btn-animelib .site-logo__corner {
+  fill: var(--anime-corner);
+}
+
+.btn-animelib .site-logo__words {
+  fill: var(--logo-words);
+}
+
+/* Loader */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  padding: var(--spacing-xl);
+  flex: 1;
+}
+
+.loader-text {
+  margin-bottom: var(--spacing-sm);
+  transition: opacity 0.1s ease;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 20px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 4px;
+  background-color: var(--bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--accent-color);
+  width: 0%;
+  transition: width 0.4s ease-in-out;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Toast */
+#toast-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  position: absolute;
+  right: 0;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  white-space: nowrap;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.hide {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.2s ease-in, opacity 0.2s ease-in;
+}
+
+.toast.success {
+  border-color: var(--success-color);
+}
+
+.toast.success i {
+  color: var(--success-color);
+}
+
+.toast.error {
+  border-color: #f44336;
+}
+
+.toast.error i {
+  color: #f44336;
+}
+
+.toast.cancel {
+  border-color: #ff9800;
+}
+
+.toast.cancel i {
+  color: #ff9800;
+}
+
+.toast i {
+  font-size: 14px;
+}

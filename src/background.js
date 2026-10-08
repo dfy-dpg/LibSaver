@@ -1,0 +1,195 @@
+// Хранилище auth токенов с TTL
+const authTokens = {};
+const TOKEN_TTL = 3600000; // 1 час в миллисекундах
+
+// Очистка истекших токенов
+function cleanupExpiredTokens() {
+  const now = Date.now();
+  for (const key in authTokens) {
+    if (authTokens[key].timestamp && (now - authTokens[key].timestamp > TOKEN_TTL)) {
+      delete authTokens[key];
+    }
+  }
+}
+
+// Периодическая очистка токенов (каждые 30 минут)
+setInterval(cleanupExpiredTokens, 1800000);
+
+// Общая функция для fetch с заголовками
+async function fetchWithHeaders(url, headers) {
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+  const blob = await response.blob();
+  const reader = new FileReader();
+  return new Promise((resolve, reject) => {
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('FileReader error'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Прямой fetch с заголовками (declarativeNetRequest добавит Referer, User-Agent, sec-ch-ua через rules.json)
+async function directFetch(request, sendResponse) {
+  const delays = [5000, 10000, 15000];
+  const maxRetries = 5;
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(request.url, {});
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const reader = new FileReader();
+        const data = await new Promise((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('FileReader error'));
+          reader.readAsDataURL(blob);
+        });
+        sendResponse({ success: true, data });
+        return;
+      }
+
+      // Обработка 429 - Too Many Requests
+      if (response.status === 429) {
+        if (attempt < maxRetries) {
+          const delay = delays[attempt];
+          console.log(`Rate limited (429) for image, waiting ${delay/1000}s before retry ${attempt + 1}/${maxRetries + 1}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        } else {
+          throw new Error('Rate limited after 5 retry attempts (5s, 10s, 15s)');
+        }
+      }
+
+      // Другие ошибки сервера
+      if (response.status >= 500) {
+        if (attempt < maxRetries) {
+          const delay = delays[attempt];
+          console.log(`Server error (${response.status}) for image, retrying in ${delay/1000}s (attempt ${attempt + 1}/${maxRetries + 1})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      }
+
+      // Другие ошибки клиента
+      if (attempt < maxRetries) {
+        const delay = delays[attempt];
+        console.log(`Request failed (${response.status}) for image, retrying in ${delay/1000}s (attempt ${attempt + 1}/${maxRetries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        const delay = delays[attempt];
+        console.log(`Network error (${error.message}) for image, retrying in ${delay/1000}s (attempt ${attempt + 1}/${maxRetries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  sendResponse({ success: false, error: lastError?.message || 'Max retries exceeded' });
+}
+
+// Перехватываем auth токены из запросов к API
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    if (details.url.startsWith('https://api.cdnlibs.org/')) {
+      const authHeader = details.requestHeaders?.find(h => h.name.toLowerCase() === 'authorization');
+      if (authHeader?.value?.startsWith('Bearer ')) {
+        const newToken = authHeader.value.substring(7);
+        if (authTokens['ranobelib']?.token !== newToken) {
+          authTokens['ranobelib'] = { token: newToken, timestamp: Date.now() };
+        }
+      }
+    }
+  },
+  { urls: ['https://api.cdnlibs.org/*'] },
+  ['requestHeaders']
+);
+
+// Инжектируем auth токены в запросы от расширения
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    if (details.tabId === -1 && details.url.startsWith('https://api.cdnlibs.org/')) {
+      if (authTokens['ranobelib']?.token) {
+        const headers = details.requestHeaders || [];
+        const authIdx = headers.findIndex(h => h.name.toLowerCase() === 'authorization');
+        const authValue = `Bearer ${authTokens['ranobelib'].token}`;
+        if (authIdx !== -1) {
+          headers[authIdx].value = authValue;
+        } else {
+          headers.push({ name: 'Authorization', value: authValue });
+        }
+        return { requestHeaders: headers };
+      }
+    }
+  },
+  { urls: ['https://api.cdnlibs.org/*'] },
+  ['requestHeaders']
+);
+
+// Функция для случайной задержки
+function randomDelay(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Функция для последовательной перезагрузки вкладок со случайной задержкой
+async function reloadTabsSequentially(tabs) {
+  for (const tab of tabs) {
+    await chrome.tabs.reload(tab.id);
+    // Случайная задержка от 500ms до 1800ms между перезагрузками
+    const delay = randomDelay(500, 1800);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+}
+
+chrome.runtime.onInstalled.addListener(async () => {
+  // Включаем declarativeNetRequest rules для manga CDN
+  await chrome.declarativeNetRequest.updateEnabledRulesets({
+    enableRulesetIds: ['manga_headers']
+  });
+
+  // При установке или обновлении расширения перезагружаем вкладки LIB сайтов последовательно
+  const patterns = [
+    '*://*.ranobelib.me/*/book/*',
+    '*://*.mangalib.me/*/manga/*',
+    '*://*.hentailib.me/*/manga/*',
+    '*://*.shlib.life/*/manga/*',
+    '*://*.animelib.org/*/anime/*'
+  ];
+  
+  for (const pattern of patterns) {
+    const tabs = await chrome.tabs.query({ url: pattern });
+    await reloadTabsSequentially(tabs);
+  }
+});
+
+chrome.runtime.onStartup.addListener(async () => {
+  // При запуске браузера перезагружаем вкладки LIB сайтов последовательно
+  const patterns = [
+    '*://*.ranobelib.me/*/book/*',
+    '*://*.mangalib.me/*/manga/*',
+    '*://*.hentailib.me/*/manga/*',
+    '*://*.shlib.life/*/manga/*',
+    '*://*.animelib.org/*/anime/*'
+  ];
+  
+  for (const pattern of patterns) {
+    const tabs = await chrome.tabs.query({ url: pattern });
+    await reloadTabsSequentially(tabs);
+  }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'fetchImage') {
+    // Все image запросы идут через directFetch с declarativeNetRequest (rules.json)
+    directFetch(request, sendResponse);
+    return true;
+  }
+});

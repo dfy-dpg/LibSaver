@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>LibSaver - Редактор обложек</title>
+  <style>body { opacity: 0; }</style>
+  <script src="../core/theme-init.js"></script>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/loading.css">
+  <script src="../utils/window-loader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../libs/Sortable.min.js"></script>
+  <link rel="stylesheet" href="../css/scale-subtle.css">
+  <link rel="stylesheet" href="../css/editor.css">
+  <style>
+    body {
+      min-width: 450px;
+      min-height: 400px;
+    }
+    .container {
+      height: 100%;
+    }
+    .covers-list {
+      flex: 1;
+      overflow-y: hidden;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    .cover-item {
+      background-color: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      padding: var(--spacing-xs);
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      min-height: 60px;
+      position: relative;
+    }
+    .cover-preview {
+      width: 40px;
+      height: 60px;
+      background-color: var(--bg-secondary);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .cover-preview.empty {
+      cursor: default;
+    }
+    .cover-preview.error {
+      cursor: default;
+    }
+    .cover-preview.loading {
+      cursor: default;
+    }
+    .cover-preview img {
+      display: none;
+    }
+    .cover-preview .img-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+    .cover-preview .img-wrapper .img-container {
+      position: relative;
+      display: inline-block;
+      max-width: 40px;
+      max-height: 60px;
+      border-radius: 3px;
+      overflow: hidden;
+      background-color: var(--bg-tertiary);
+    }
+    .cover-preview .img-wrapper .img-container img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 3px;
+      object-fit: contain;
+      display: none;
+    }
+    .cover-preview .img-wrapper .img-container img.loaded {
+      display: block;
+    }
+    .cover-preview .img-wrapper .img-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 3px;
+      background-color: rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .cover-preview:hover .img-wrapper.has-image .img-container::after {
+      opacity: 1;
+    }
+    /* Стили Tippy для соответствия дизайну */
+    .tippy-box[data-theme='dark'] {
+      background-color: rgba(10, 10, 10, 0.95);
+      border: 1px solid #3b3d45;
+      border-radius: 6px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    .tippy-box[data-theme='dark'] > .tippy-arrow::before {
+      border-top-color: #3b3d45;
+    }
+    .tippy-box[data-theme='dark'] > .tippy-arrow::after {
+      border-top-color: rgba(10, 10, 10, 0.95);
+    }
+    .tippy-box[data-theme='light'] {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    .tippy-box[data-theme='light'] > .tippy-arrow::before {
+      border-top-color: var(--border-color);
+    }
+    .tippy-box[data-theme='light'] > .tippy-arrow::after {
+      border-top-color: var(--bg-secondary);
+    }
+    .tippy-content {
+      padding: 2px;
+    }
+    .sortable-ghost {
+      opacity: 0.4;
+      background-color: var(--bg-secondary);
+      border: 2px dashed var(--accent-color);
+      overflow: hidden;
+    }
+    .sortable-chosen {
+      opacity: 1;
+      overflow: hidden;
+    }
+    .sortable-drag {
+      opacity: 0;
+      overflow: hidden;
+    }
+    .drag-handle {
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 3px;
+      background-color: var(--border-color);
+      border-radius: 2px;
+      cursor: grab;
+      user-select: none;
+    }
+    .drag-handle::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -10px;
+      right: -10px;
+      bottom: -8px;
+    }
+    .drag-handle:hover {
+      background-color: var(--text-primary);
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+      background-color: var(--text-primary);
+    }
+    .cover-inputs {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 60px;
+      gap: 0;
+    }
+    .image-info {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      min-height: 2px;
+      line-height: 2px;
+    }
+    .input-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    input[type="text"] {
+      flex: 1;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 0 8px;
+      font-size: 12px;
+      outline: none;
+      height: 30px;
+      box-sizing: border-box;
+    }
+    input[type="text"]:focus {
+      border-color: var(--accent-color);
+    }
+    .btn-file {
+      background-color: var(--border-color);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 3px;
+      padding: 0;
+      font-size: 12px;
+      cursor: pointer;
+      height: 30px;
+      white-space: nowrap;
+      width: 100px;
+      max-width: 100px;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .btn-file:hover {
+      background-color: var(--border-hover);
+    }
+    .btn-delete {
+      background-color: var(--danger-color);
+      color: var(--accent-text-color);
+      border: none;
+      border-radius: 3px;
+      padding: 0;
+      font-size: 12px;
+      cursor: pointer;
+      width: 30px;
+      min-width: 30px;
+      max-width: 30px;
+      height: 30px;
+      min-height: 30px;
+      max-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      margin-top: auto;
+    }
+    .btn-delete:hover {
+      background-color: var(--danger-hover);
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .empty-state {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 40px;
+    }
+    .counter {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .counter span {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .editor-disabled-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: var(--text-secondary);
+      z-index: 1000;
+    }
+    .disabled-gif {
+      display: block;
+      margin: 0 auto 16px auto;
+      max-width: 200px;
+      max-height: 200px;
+    }
+    .editor-disabled-message p {
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="btn-save" id="btn-save">
+        <i class="fa-solid fa-save"></i>
+        Сохранить
+      </button>
+      <button class="btn-secondary" id="btn-add">
+        <i class="fa-solid fa-plus"></i>
+        Новая обложка
+      </button>
+      <button class="btn-secondary" id="btn-reset">
+        <i class="fa-solid fa-rotate-left"></i>
+        Сбросить всё
+      </button>
+      <button class="btn-danger" id="btn-delete-all">
+        <i class="fa-solid fa-trash"></i>
+        Удалить всё
+      </button>
+    </div>
+    <div class="toolbar-right">
+      <span class="counter">Обложек: <span id="cover-count">0</span></span>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div id="editor-disabled-message" class="editor-disabled-message" style="display: none;">
+      <img src="../assets/gif/disable.gif" alt="Editor disabled" class="disabled-gif">
+      <p>Данный редактор утратил свою силу...</p>
+      <p style="font-size: 12px;">"Без обложек" выбрано в настройках...</p>
+    </div>
+    <div class="covers-list" id="covers-list">
+      <div class="empty-state">Нет обложек</div>
+    </div>
+  </div>
+
+  <div class="scroll-buttons" id="scroll-buttons" style="display: none;">
+    <button class="scroll-btn" id="scroll-btn" title="Наверх">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </div>
+
+  <input type="file" id="file-input" accept="image/*" style="display: none;">
+  
+  <script src="../libs/jszip.min.js"></script>
+  <script src="../libs/FileSaver.min.js"></script>
+  <script src="../libs/pica.min.js"></script>
+  <script src="../libs/popper.min.js"></script>
+  <script src="../libs/tippy-bundle.umd.min.js"></script>
+  <script src="../core/theme.js"></script>
+  <script src="../editors/covers.js"></script>
+  <script src="../utils/scroll.js"></script>
+</body>
+</html>

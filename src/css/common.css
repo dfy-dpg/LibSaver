@@ -1,0 +1,549 @@
+/* Общие стили для всех страниц расширения */
+
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
+:root {
+  /* Тёмная тема (по умолчанию) */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1c1c1c;
+  --bg-tertiary: #1a1a1a;
+  --background-elevated-2: #252525;
+  --border-color: #414143;
+  --border-base: #414143;
+  --border-hover: #4b4d55;
+  --input-border: #414143;
+  --text-primary: #bfbfbf;
+  --text-secondary: rgba(235, 235, 245, 0.5);
+  --accent-text-color: #ffffff;
+  
+  /* Акцентные цвета по сайтам (тёмная тема) */
+  --manga-accent: #ef6c00;
+  --manga-accent-hover: #d86201;
+  --hentai-accent: #b71c1c;
+  --hentai-accent-hover: #a61a1a;
+  --slash-accent: #ad1457;
+  --slash-accent-hover: #9d134f;
+  --ranobe-accent: #1565c0;
+  --ranobe-accent-hover: #145cae;
+  --anime-accent: #5e35b1;
+  --anime-accent-hover: #5631a0;
+  
+  /* Мягкий акцентный цвет для селекторов (с прозрачностью) */
+  --manga-accent-soft: rgba(239, 108, 0, 0.2);
+  --hentai-accent-soft: rgba(183, 28, 28, 0.2);
+  --slash-accent-soft: rgba(173, 20, 87, 0.2);
+  --ranobe-accent-soft: rgba(21, 101, 192, 0.2);
+  --anime-accent-soft: rgba(94, 53, 177, 0.2);
+  
+  /* Цвета чекбоксов (светлые варианты, кроме animelib) */
+  --manga-checkbox: #ff9100;
+  --hentai-checkbox: #f44336;
+  --slash-checkbox: #d81b60;
+  --ranobe-checkbox: #2196f3;
+  --anime-checkbox: #7e57c2;
+  
+  /* Цвета SVG логотипов (тёмная тема) */
+  --manga-corner: #ff9100;
+  --hentai-corner: #f44336;
+  --slash-corner: #d81b60;
+  --ranobe-corner: #2196f3;
+  --anime-corner: #7e57c2;
+  --logo-words: #bfbfbf;
+  
+  --accent-color: #1565c0;
+  --accent-hover: #145cae;
+  --danger-color: #c62828;
+  --danger-hover: #b71c1c;
+  --success-color: #3cce7b;
+  --primary: #2196f3;
+  --border-radius: 4px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 14px;
+}
+
+/* Глобальный кастомный скроллбар */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+  border: 1px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Стили для disabled чекбоксов */
+input[type="checkbox"]:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+input[type="checkbox"]:disabled ~ .control__indicator {
+  opacity: 0.6;
+  cursor: default;
+}
+
+input[type="checkbox"]:disabled ~ .control__indicator svg {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Стили для текста рядом с disabled чекбоксами */
+input[type="checkbox"]:disabled ~ .chapter-label,
+input[type="checkbox"]:disabled ~ .volume-label,
+input[type="checkbox"]:disabled ~ * {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Стили для disabled checkbox-group */
+.checkbox-group-disabled {
+  cursor: default !important;
+}
+
+.checkbox-group-disabled * {
+  cursor: default !important;
+}
+
+/* Дополнительное правило для label.checkbox-group с disabled чекбоксом */
+label.checkbox-group:has(input[type="checkbox"]:disabled) {
+  cursor: default !important;
+}
+
+label.checkbox-group:has(input[type="checkbox"]:disabled) * {
+  cursor: default !important;
+}
+
+[data-theme="light"] {
+  /* Светлая тема */
+  --bg-primary: #f2f2f3;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #ffffff;
+  --background-elevated-2: #f5f5f5;
+  --border-color: #e5e5e5;
+  --border-base: #e5e5e5;
+  --border-hover: #d0d0d0;
+  --input-border: #e5e5e5;
+  --text-primary: #212529;
+  --text-secondary: rgba(33, 37, 41, 0.6);
+  --accent-text-color: #ffffff;
+  
+  /* Акцентные цвета по сайтам (светлая тема) */
+  --manga-accent: #ff9100;
+  --manga-accent-hover: #fe9b18;
+  --hentai-accent: #f44336;
+  --hentai-accent-hover: #f45449;
+  --slash-accent: #d81b60;
+  --slash-accent-hover: #da306e;
+  --ranobe-accent: #2196f3;
+  --ranobe-accent-hover: #369ff3;
+  --anime-accent: #5e35b1;
+  --anime-accent-hover: #6d48b7;
+  
+  /* Мягкий акцентный цвет для селекторов (с прозрачностью) */
+  --manga-accent-soft: rgba(255, 145, 0, 0.2);
+  --hentai-accent-soft: rgba(244, 67, 54, 0.2);
+  --slash-accent-soft: rgba(216, 27, 96, 0.2);
+  --ranobe-accent-soft: rgba(33, 150, 243, 0.2);
+  --anime-accent-soft: rgba(94, 53, 177, 0.2);
+  
+  /* Цвета чекбоксов (светлые варианты, animelib использует другой цвет) */
+  --manga-checkbox: #ff9100;
+  --hentai-checkbox: #f44336;
+  --slash-checkbox: #d81b60;
+  --ranobe-checkbox: #2196f3;
+  --anime-checkbox: #5e35b1;
+  
+  /* Цвета SVG логотипов (светлая тема) */
+  --manga-corner: #ff9100;
+  --hentai-corner: #f44336;
+  --slash-corner: #d81b60;
+  --ranobe-corner: #2196f3;
+  --anime-corner: #7e57c2;
+  --logo-words: #212529;
+  
+  /* Фоны по сайтам (светлая тема) */
+  --manga-bg: #fff3e0;
+  --hentai-bg: #ffcccc;
+  --slash-bg: #ffe0ee;
+  --ranobe-bg: #e0f2ff;
+  --anime-bg: #ede7f6;
+  
+  /* Обычная белая кнопка (светлая тема) */
+  --button-bg: #ffffff;
+  --button-hover: #fefefe;
+  
+  --primary: #2196f3;
+  
+  --accent-color: #2196f3;
+  --accent-hover: #369ff3;
+  --danger-color: #f44336;
+  --danger-hover: #f45449;
+  --success-color: #4caf50;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.01em;
+  transition: none;
+}
+
+/* Общие стили для toolbar */
+.toolbar {
+  position: sticky;
+  top: 0;
+  height: 40px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.toolbar button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border-radius: var(--border-radius);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-weight: 600;
+  flex: none;
+  white-space: nowrap;
+}
+
+.toolbar .btn-save {
+  background-color: var(--accent-color);
+  color: var(--accent-text-color);
+}
+
+.toolbar .btn-save:hover {
+  background-color: var(--accent-hover);
+}
+
+.toolbar .btn-secondary {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.toolbar .btn-secondary:hover {
+  background-color: var(--border-hover);
+}
+
+.toolbar .btn-danger {
+  background-color: var(--danger-color);
+  color: var(--accent-text-color);
+}
+
+.toolbar .btn-danger:hover {
+  background-color: var(--danger-hover);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.panel {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+select {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 6px var(--spacing-md);
+  font-size: var(--font-size-md);
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+select:focus {
+  border-color: var(--border-hover);
+}
+
+/* Единый стиль для всех input и textarea во всём расширении */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+textarea {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 6px var(--spacing-md);
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: 1.4;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+textarea:focus {
+  border-color: var(--accent-color);
+}
+
+/* Placeholder стили */
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+input[type="email"]::placeholder,
+input[type="url"]::placeholder,
+input[type="search"]::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+textarea {
+  min-height: 60px;
+  resize: none;
+  overflow-y: auto;
+}
+
+button {
+  background-color: var(--accent-color);
+  color: var(--accent-text-color);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button:hover {
+  background-color: var(--accent-hover);
+}
+
+button:disabled {
+  background-color: var(--border-color);
+  cursor: default;
+  opacity: 0.6;
+  transform: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Унифицированные стили для SVG чекбоксов */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  font-size: 13px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.checkbox-group .control__indicator {
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.checkbox-group * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+.checkbox-group:active {
+  cursor: pointer;
+}
+
+.checkbox-group:active * {
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.control__indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--border-color);
+  transition: color 0.15s ease-in-out;
+}
+
+.control__indicator svg {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.control__indicator svg[data-state="default"] {
+  display: block;
+}
+
+.control__indicator svg[data-state="checked"] {
+  display: none;
+}
+
+.checkbox-group input[type="checkbox"]:checked ~ .control__indicator svg[data-state="default"] {
+  display: none;
+}
+
+.checkbox-group input[type="checkbox"]:checked ~ .control__indicator svg[data-state="checked"] {
+  display: block;
+  color: var(--checkbox-color);
+}
+
+.checkbox-group:hover .control__indicator {
+  color: var(--border-color);
+}
+
+.checkbox-group span:not(.control__indicator) {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+}
+
+/* Светлая тема для чекбоксов */
+[data-theme="light"] .checkbox-group .control__indicator {
+  color: var(--border-color);
+}
+
+[data-theme="light"] .checkbox-group:hover .control__indicator {
+  color: var(--border-color);
+}
+
+/* Стили кнопок прокрутки */
+.scroll-buttons {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.scroll-btn {
+  width: 40px;
+  height: 40px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  cursor: pointer;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out, visibility 0.15s ease-in-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scroll-btn:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-hover);
+}
+
+.scroll-btn i {
+  font-size: 16px;
+  transition: transform 0.15s ease-in-out;
+}

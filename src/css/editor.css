@@ -1,0 +1,223 @@
+/* Стили для редакторов (metadata, chapters, covers) */
+
+body {
+  min-width: 450px;
+  padding: 0;
+  margin: 0;
+}
+
+.container {
+  gap: var(--spacing-xs);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+.field {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+}
+
+/* Стили для карточек глав (chapters.html) */
+.chapter-item {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.chapter-title {
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: default;
+  user-select: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.chapter-title:hover {
+  color: var(--text-primary);
+}
+
+.chapter-title:active {
+  cursor: default;
+  color: var(--text-primary);
+}
+
+.chapter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chapter-reset-btn {
+  background: none !important;
+  border: none !important;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  padding: 0 var(--spacing-xs);
+  opacity: 0.5;
+  user-select: none;
+}
+
+.chapter-reset-btn:hover {
+  opacity: 1;
+  background: none !important;
+  border: none !important;
+}
+
+.chapter-input {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 6px var(--spacing-md);
+  font-size: var(--font-size-md);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chapter-input:focus {
+  border-color: var(--accent-color);
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.field-header label {
+  align-self: flex-start;
+}
+
+.field-header-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+label {
+  align-self: flex-start;
+  cursor: grab;
+  user-select: none;
+}
+
+label:hover {
+  color: var(--text-primary);
+}
+
+label:active {
+  cursor: grabbing;
+  color: var(--text-primary);
+}
+
+label.editing {
+  cursor: text;
+  user-select: text;
+  outline: none;
+  text-transform: none;
+}
+
+.field.disabled {
+  opacity: 0.5;
+}
+
+.field.disabled input,
+.field.disabled textarea {
+  background-color: var(--bg-tertiary);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.field.disabled .field-header-buttons {
+  pointer-events: none;
+}
+
+.field.disabled .field-header-buttons button {
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+/* Кнопка видимости должна работать даже когда поле отключено */
+.field.disabled .field-header-buttons .field-visibility-btn {
+  pointer-events: auto;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.field.disabled .field-header-buttons .field-visibility-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Drag and Drop стили */
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: var(--bg-secondary);
+  border: 2px dashed var(--accent-color);
+  overflow: hidden;
+}
+
+.sortable-chosen {
+  opacity: 1;
+  overflow: hidden;
+}
+
+.sortable-drag {
+  opacity: 0;
+  overflow: hidden;
+}
+
+.field.disabled.sortable-drag {
+  opacity: 0;
+  overflow: hidden;
+}
+
+.drag-handle {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--spacing-sm);
+  position: relative;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Кнопки полей */
+.field-reset-btn,
+.field-rename-btn,
+.field-visibility-btn {
+  background: none !important;
+  border: none !important;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  padding: 0 var(--spacing-xs);
+  opacity: 0.5;
+  user-select: none;
+}
+
+.field-reset-btn:hover,
+.field-rename-btn:hover,
+.field-visibility-btn:hover {
+  opacity: 1;
+  background: none !important;
+  border: none !important;
+}
+
+/* Специфичные стили для редакторов (переопределяют common.css) */
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <script src="../core/theme-init.js"></script>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/popup.css">
+</head>
+<body>
+  <div id="loader" class="loader">
+    <div class="loader-text" id="loader-text">Получение метаданных...</div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="loader-progress"></div>
+    </div>
+  </div>
+
+  <div id="error-view" class="container hidden">
+    <div class="panel message-box">
+      <div id="error-text" class="message-text">Выберите нужное произведение и перейдите на его главную страницу.</div>
+      <div class="lib-buttons">
+        <button id="btn-mangalib" class="btn-redirect btn-mangalib hidden" title="MangaLIB">
+          <div class="lib-logo" data-svg="assets/svg/MangaLIB.svg"></div>
+        </button>
+        <button id="btn-hentailib" class="btn-redirect btn-hentailib hidden" title="HentaiLIB">
+          <div class="lib-logo" data-svg="assets/svg/HentaiLIB.svg"></div>
+        </button>
+        <button id="btn-shlib" class="btn-redirect btn-shlib hidden" title="SlashLIB">
+          <div class="lib-logo" data-svg="assets/svg/SlashLIB.svg"></div>
+        </button>
+        <button id="btn-ranobelib" class="btn-redirect btn-ranobelib hidden" title="RanobeLIB">
+          <div class="lib-logo" data-svg="assets/svg/RanobeLIB.svg"></div>
+        </button>
+        <button id="btn-animelib" class="btn-redirect btn-animelib hidden" title="AnimeLIB">
+          <div class="lib-logo" data-svg="assets/svg/AnimeLIB.svg"></div>
+        </button>
+      </div>
+      <button id="btn-reload-page" class="btn-redirect hidden">Перезагрузить страницу</button>
+    </div>
+  </div>
+
+    <div id="main-view" class="container hidden">
+    <div id="book-title" class="title">Название Ранобэ</div>
+    
+    <div class="panel">
+      <div class="range-container">
+        <div class="field">
+          <label for="chapter-from">От</label>
+          <select id="chapter-from"></select>
+        </div>
+        <div class="field">
+          <label for="chapter-to">До</label>
+          <select id="chapter-to"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <div class="btn-group hidden">
+    <button id="btn-download" style="flex-grow: 1; height: 40px;" disabled>Подготовка</button>
+    <button id="btn-metadata" class="btn-edit" title="Редактор метаданных" disabled>
+      <i class="fa-solid fa-circle-info"></i>
+    </button>
+    <button id="btn-covers" class="btn-edit" title="Редактор обложек" disabled>
+      <i class="fa-solid fa-images"></i>
+    </button>
+    <button id="btn-edit-chapters" class="btn-edit" title="Редактор оглавления" disabled>
+      <i class="fa-solid fa-pen-to-square"></i>
+    </button>
+    <button id="btn-settings" class="btn-edit" title="Настройки">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+  </div>
+
+  <script src="../libs/jszip.min.js"></script>
+  <script src="../libs/FileSaver.min.js"></script>
+  <script src="../libs/pica.min.js"></script>
+  <script src="../utils/header.js"></script>
+  <script src="../core/api.js"></script>
+  <script src="../utils/protection.js"></script>
+  <script src="../core/statistics.js"></script>
+  <script src="../core/theme.js"></script>
+  <script src="../utils/toast.js"></script>
+  <script src="../core/popup.js"></script>
+</body>
+</html>

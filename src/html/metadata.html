@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>LibSaver - Редактор метаданных</title>
+  <style>body { opacity: 0; }</style>
+  <script src="../core/theme-init.js"></script>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/loading.css">
+  <script src="../utils/window-loader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../libs/Sortable.min.js"></script>
+  <link rel="stylesheet" href="../css/editor.css">
+  <style>
+    .auto-resize {
+      min-height: 28px !important;
+      max-height: 280px;
+      overflow-y: hidden;
+      vertical-align: top;
+      resize: none;
+      line-height: 1.4;
+      padding: 6px var(--spacing-md);
+    }
+    .auto-resize.limit-reached {
+      overflow-y: auto;
+    }
+    .auto-resize::-webkit-scrollbar,
+    .auto-resize::-webkit-scrollbar-thumb,
+    .auto-resize::-webkit-scrollbar-track {
+      cursor: default;
+    }
+    #title-alt {
+      white-space: pre;
+      overflow-x: auto;
+      overflow-y: hidden;
+      height: auto;
+      min-height: 28px !important;
+      max-height: 280px;
+      resize: none;
+      line-height: 1.4;
+      padding: 6px var(--spacing-md);
+    }
+    #title-alt.limit-reached {
+      overflow-y: auto;
+    }
+    #title-alt::-webkit-scrollbar,
+    #title-alt::-webkit-scrollbar-thumb,
+    #title-alt::-webkit-scrollbar-track {
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="btn-save" id="btn-save">
+        <i class="fa-solid fa-save"></i>
+        Сохранить
+      </button>
+      <button class="btn-secondary" id="btn-reset">
+        <i class="fa-solid fa-rotate-left"></i>
+        Сбросить всё
+      </button>
+      <button class="btn-secondary" id="btn-reset-order">
+        <i class="fa-solid fa-arrow-down-up"></i>
+        Сбросить порядок
+      </button>
+      <button class="btn-danger" id="btn-clear-all">
+        <i class="fa-solid fa-eraser"></i>
+        Очистить всё
+      </button>
+    </div>
+    <div class="toolbar-right">
+    </div>
+  </div>
+  
+  <div class="container" id="fields-container">
+    <div class="field" data-field="title-ru">
+      <div class="field-header">
+        <label>Название (RU)</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="title-ru">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="title-ru">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="title-ru">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="title-ru">
+    </div>
+    
+    <div class="field" data-field="title-en">
+      <div class="field-header">
+        <label>Название (EN)</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="title-en">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="title-en">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="title-en">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="title-en">
+    </div>
+    
+    <div class="field" data-field="title-original">
+      <div class="field-header">
+        <label>Название (SRC)</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="title-original">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="title-original">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="title-original">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="title-original">
+    </div>
+
+    <div class="field" data-field="title-alt">
+      <div class="field-header">
+        <label>Название (ALT)</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="title-alt">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="title-alt">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="title-alt">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <textarea id="title-alt" class="auto-resize" rows="1"></textarea>
+    </div>
+
+    <div class="field" data-field="author">
+      <div class="field-header">
+        <label>Автор</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="author">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="author">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="author">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="author">
+    </div>
+
+    <div class="field" data-field="artist">
+      <div class="field-header">
+        <label>Художник</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="artist">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="artist">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="artist">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="artist">
+    </div>
+
+    <div class="field" data-field="year">
+      <div class="field-header">
+        <label>Год</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="year">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="year">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="year">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="year">
+    </div>
+
+    <div class="field" data-field="status">
+      <div class="field-header">
+        <label>Статус</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="status">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="status">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="status">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="status">
+    </div>
+
+    <div class="field" data-field="country">
+      <div class="field-header">
+        <label>Тип</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="country">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="country">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="country">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="country">
+    </div>
+
+    <div class="field" data-field="release-format">
+      <div class="field-header">
+        <label>Формат</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="release-format">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="release-format">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="release-format">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="release-format">
+    </div>
+
+    <div class="field" data-field="publisher">
+      <div class="field-header">
+        <label>Издательство</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="publisher">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="publisher">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="publisher">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="publisher">
+    </div>
+
+    <div class="field" data-field="age-restriction">
+      <div class="field-header">
+        <label>Возрастной рейтинг</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="age-restriction">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="age-restriction">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="age-restriction">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <input type="text" id="age-restriction">
+    </div>
+
+    <div class="field" data-field="description">
+      <div class="field-header">
+        <label>Описание</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="description">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="description">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="description">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <textarea id="description" class="auto-resize" rows="1"></textarea>
+    </div>
+
+    <div class="field" data-field="genres">
+      <div class="field-header">
+        <label>Жанры</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="genres">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="genres">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="genres">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <textarea id="genres" class="auto-resize" rows="1"></textarea>
+    </div>
+
+    <div class="field" data-field="tags">
+      <div class="field-header">
+        <label>Метки</label>
+        <div class="field-header-buttons">
+          <button class="field-visibility-btn" data-field="tags">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+          <button class="field-rename-btn" data-field="tags">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="field-reset-btn" data-field="tags">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+      <textarea id="tags" class="auto-resize" rows="1"></textarea>
+    </div>
+  </div>
+
+  <div class="scroll-buttons" id="scroll-buttons" style="display: none;">
+    <button class="scroll-btn" id="scroll-btn" title="Наверх">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </div>
+
+  <script src="../libs/autosize.min.js"></script>
+  <script src="../core/theme.js"></script>
+  <script src="../editors/metadata.js"></script>
+  <script src="../utils/scroll.js"></script>
+</body>
+</html>

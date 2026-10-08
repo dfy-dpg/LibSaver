@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "LibSaver",
+  "version": "1.6",
+  "description": "Любимые тайтлы при белых списках.",
+  "author": "DPG",
+  "homepage_url": "https://github.com/dfy-dpg/LibSaver",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "activeTab",
+    "webRequest",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "downloads",
+    "system.display"
+  ],
+
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "manga_headers",
+      "enabled": true,
+      "path": "rules.json"
+    }]
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://ranobelib.me/*", "https://*.ranobelib.me/*", "https://novelslib.me/*", "https://*.novelslib.me/*", "https://mangalib.me/*", "https://*.mangalib.me/*", "https://mangalib.org/*", "https://*.mangalib.org/*", "https://hentailib.me/*", "https://*.hentailib.me/*", "https://hentailib.org/*", "https://*.hentailib.org/*", "https://shlib.life/*", "https://*.shlib.life/*", "https://animelib.org/*", "https://*.animelib.org/*", "https://anilib.me/*", "https://*.anilib.me/*"],
+      "js": ["content/SiteMenuRestorer.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "html/popup.html",
+    "default_title": "LibSaver - Скачивание тайтлов"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["html/popup.html", "html/settings.html", "html/metadata.html", "html/chapters.html", "html/covers.html", "html/prepare.html", "assets/local_data", "assets/svg/*.svg", "assets/fonts/*", "assets/gif/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

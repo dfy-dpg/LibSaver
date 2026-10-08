@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>LibSaver - Редактор оглавления</title>
+  <style>body { opacity: 0; }</style>
+  <script src="../core/theme-init.js"></script>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/loading.css">
+  <script src="../utils/window-loader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/editor.css">
+  <style>
+    .chapters-list {
+      flex: 1;
+      overflow-y: hidden;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--spacing-sm);
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      margin-bottom: var(--spacing-md);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .toolbar-left {
+      display: flex;
+      gap: var(--spacing-sm);
+      align-items: center;
+    }
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    
+    .btn-load-more {
+      padding: 8px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-load-more:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--accent-color);
+    }
+    
+    .btn-load-more:active {
+      transform: scale(0.98);
+    }
+    
+    .load-more-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+    .toolbar-right .field {
+      margin: 0;
+      padding: 0;
+      background: none;
+    }
+    .toolbar-right .field select {
+      min-width: 150px;
+    }
+    .translator-selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    #translator-select {
+      background: var(--bg-tertiary);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      cursor: default;
+    }
+    #translator-select:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .counter {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .counter span {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .counter-separator {
+      color: var(--text-secondary);
+      margin: 0 var(--spacing-xs);
+    }
+    /* Стили для селектора переводчика в главе */
+    .chapter-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      width: 100%;
+      position: relative;
+    }
+    .chapter-input-wrapper .chapter-input {
+      flex: 1;
+      padding-right: 8px;
+    }
+    .chapter-input-wrapper .chapter-translator {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+    .chapter-input-wrapper .chapter-translator:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+    .chapter-translator-dropdown {
+      position: absolute;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      min-width: 120px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .chapter-translator-option {
+      padding: 6px var(--spacing-md);
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter-translator-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .chapter-translator-option.selected {
+      background: var(--accent-soft);
+      color: var(--text-primary);
+    }
+    .translator-priority-popup {
+      padding: 16px;
+      min-width: 360px;
+      max-width: 420px;
+      background: #0a0a0a;
+      border: 1px solid #3b3d45;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    [data-theme="light"] .translator-priority-popup {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+    /* Переопределение стилей tippy */
+    .tippy-box {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .tippy-content {
+      padding: 0 !important;
+    }
+    .translator-priority-header {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .translator-priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    .translator-priority-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      cursor: default;
+      transition: all 0.2s;
+    }
+    .translator-priority-item:active {
+      cursor: default;
+    }
+    .translator-priority-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .translator-priority-item:active {
+      cursor: default;
+    }
+    .translator-priority-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: default;
+    }
+    .translator-priority-count {
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: default;
+      background: var(--bg-tertiary);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+    }
+    .translator-priority-controls {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+    .translator-priority-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: var(--spacing-xs);
+      border-radius: var(--border-radius);
+      transition: all 0.2s;
+      opacity: 0.5;
+      font-size: 10px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .translator-priority-btn:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+    .translator-priority-btn:active {
+      transform: scale(0.95);
+    }
+    .translator-priority-btn:disabled {
+      opacity: 0.2;
+      cursor: default;
+    }
+    .translator-priority-btn:disabled:hover {
+      opacity: 0.2 !important;
+      color: var(--text-secondary) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="btn-save" id="btn-save">
+        <i class="fa-solid fa-save"></i>
+        Сохранить
+      </button>
+      <button class="btn-secondary" id="btn-reset">
+        <i class="fa-solid fa-rotate-left"></i>
+        Сбросить всё
+      </button>
+      <button class="btn-danger" id="btn-clear-all">
+        <i class="fa-solid fa-eraser"></i>
+        Очистить всё
+      </button>
+      <div class="translator-selector" id="translator-field" style="display: none;">
+        <div class="chapter-translator" id="translator-select">Переводчик</div>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <span class="counter">Всего: <span id="total-chapters">0</span></span>
+      <span class="counter-separator">|</span>
+      <span class="counter" id="branch-counter">Обнаружено: <span id="chapter-count">0</span></span>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="chapters-list" id="chapters-list">
+      <!-- Список глав для редактирования -->
+    </div>
+  </div>
+
+  <div class="scroll-buttons" id="scroll-buttons" style="display: none;">
+    <button class="scroll-btn" id="scroll-btn" title="Наверх">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </div>
+
+  <script src="../libs/popper.min.js"></script>
+  <script src="../libs/tippy-bundle.umd.min.js"></script>
+  <script src="../utils/header.js"></script>
+  <script src="../core/theme.js"></script>
+  <script src="../editors/chapters.js"></script>
+  <script src="../utils/scroll.js"></script>
+</body>
+</html>
