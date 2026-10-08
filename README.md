@@ -43,7 +43,7 @@
 - EPUB
 - PDF
 - FB2 (только для RanobeLIB)
-- TXT (только для RanobeLIB)
+- TXT + картинки (только для RanobeLIB)
 - CBZ / ZIP (только манга-сайты)
 - HTML (в разработке)
 
