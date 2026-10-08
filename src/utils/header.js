@@ -42,6 +42,16 @@ function formatChapterTitle(vol, num, name, tocFormat, customTocFormat, hideChap
     case 'format3':
       title = `Том ${volStr} - Глава ${numStr} ${nameStr ? '- ' + nameStr : ''}`;
       break;
+    case 'format4':
+      // Кастомная логика для format4 (со слешами)
+      title = `Том ${volStr} / Глава ${numStr} / ${nameStr}`;
+      if (hideVolumeNumber) {
+        title = `Глава ${numStr} / ${nameStr}`;
+      }
+      if (hideChapterName) {
+        title = hideVolumeNumber ? `Глава ${numStr}` : `Том ${volStr} / Глава ${numStr}`;
+      }
+      return title.trim();
     case 'no_headers':
       // Без заголовков в контенте, но оставляем нормальный заголовок для UI/TOC
       title = `Том ${volStr}. Глава ${numStr}.${nameStr ? ' ' + nameStr : ''}`;
