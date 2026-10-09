@@ -25,26 +25,114 @@ function formatChapterTitle(vol, num, name, tocFormat, customTocFormat, hideChap
       // Сначала обрабатываем экранирование: \[ → [, \] → ]
       result = result.replace(/\\\[/g, '\x00').replace(/\\\]/g, '\x01');
 
-      // Заменяем плейсхолдеры везде (и внутри скобок, и снаружи)
-      result = result.replace('{vol}', volStr).replace('{num}', numStr).replace('{name}', nameStr);
+      // Разбиваем на части: вне скобок и внутри скобок
+      const parts = [];
+      let lastIndex = 0;
+      const sectionRegex = /\[([^\[\]]*)\]/g;
+      let match;
 
-      // Шаг 1: Удаляем пустые секции с разделителями вокруг
-      // Ищем: ~ [] ~ или ~ [] или [] ~
-      result = result.replace(/([^\w\s])\s*\[\s*\]\s*([^\w\s])/g, '$1$2');
-      result = result.replace(/([^\w\s])\s*\[\s*\]$/, '$1');
-      result = result.replace(/^\s*\[\s*\]\s*([^\w\s])/, '$1');
+      while ((match = sectionRegex.exec(result)) !== null) {
+        // Добавляем текст до секции
+        if (match.index > lastIndex) {
+          parts.push({
+            type: 'literal',
+            content: result.slice(lastIndex, match.index)
+          });
+        }
+        // Добавляем секцию
+        parts.push({
+          type: 'section',
+          content: match[1]
+        });
+        lastIndex = match.index + match[0].length;
+      }
 
-      // Шаг 2: Убираем квадратные скобки из оставшихся секций
-      result = result.replace(/\[/g, '').replace(/\]/g, '');
+      // Добавляем оставшийся текст после последней секции
+      if (lastIndex < result.length) {
+        parts.push({
+          type: 'literal',
+          content: result.slice(lastIndex)
+        });
+      }
 
-      // Шаг 3: Удаляем разделитель + пробелы в конце строки
-      result = result.replace(/([^\w\s])\s+$/, '$1');
+      // Обрабатываем каждую часть
+      const processedParts = [];
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (part.type === 'literal') {
+          // Заменяем плейсхолдеры в тексте вне скобок
+          let processed = part.content
+            .replace('{vol}', volStr)
+            .replace('{num}', numStr)
+            .replace('{name}', nameStr);
+          processedParts.push({
+            type: 'literal',
+            content: processed
+          });
+        } else if (part.type === 'section') {
+          // Заменяем плейсхолдеры внутри секции
+          let processed = part.content
+            .replace('{vol}', volStr)
+            .replace('{num}', numStr)
+            .replace('{name}', nameStr);
 
-      // Шаг 4: Удаляем пробелы + разделитель в начале строки
-      result = result.replace(/^\s+([^\w\s])/, '$1');
+          // Если секция пустая - пропускаем её
+          if (!processed || processed.trim() === '') {
+            processedParts.push({
+              type: 'section',
+              content: '',
+              isEmpty: true
+            });
+          } else {
+            // Добавляем секцию без скобок
+            processedParts.push({
+              type: 'section',
+              content: processed,
+              isEmpty: false
+            });
+          }
+        }
+      }
 
-      // Шаг 5: Схлопываем дубликаты разделителей (2+ одинаковых неалфавитных символов подряд)
-      result = result.replace(/([^\w\s])\1+/g, '$1');
+      // Удаляем пустые секции с разделителями
+      const finalParts = [];
+      for (let i = 0; i < processedParts.length; i++) {
+        const part = processedParts[i];
+
+        if (part.type === 'section' && part.isEmpty) {
+          // Пропускаем пустую секцию, но удаляем разделители вокруг
+          // Удаляем trailing разделитель из предыдущего literal
+          if (finalParts.length > 0 && finalParts[finalParts.length - 1].type === 'literal') {
+            const prevLiteral = finalParts[finalParts.length - 1];
+            // Если предыдущий literal состоит только из разделителей, цифр и пробелов - удаляем его полностью
+            if (/^[\d\s\p{P}\p{S}]+$/u.test(prevLiteral.content)) {
+              finalParts.pop();
+            } else {
+              // Иначе удаляем только последний разделитель
+              prevLiteral.content = prevLiteral.content.replace(/[\d\s\p{P}\p{S}]$/u, '');
+            }
+          }
+          // Удаляем leading разделитель из следующего literal
+          if (i + 1 < processedParts.length && processedParts[i + 1].type === 'literal') {
+            const nextLiteral = processedParts[i + 1];
+            // Если следующий literal состоит только из разделителей, цифр и пробелов - удаляем его полностью
+            if (/^[\d\s\p{P}\p{S}]+$/u.test(nextLiteral.content)) {
+              // Пропускаем его (не добавим в finalParts)
+            } else {
+              // Иначе удаляем только первый разделитель
+              nextLiteral.content = nextLiteral.content.replace(/^[\d\s\p{P}\p{S}]/u, '');
+            }
+          }
+        } else {
+          finalParts.push(part);
+        }
+      }
+
+      // Собираем результат
+      result = finalParts.map(p => p.content).join('');
+
+      // Схлопываем дубликаты разделителей (Unicode-aware)
+      result = result.replace(/([\p{P}\p{S}])\1+/gu, '$1');
 
       // Восстанавливаем экранированные скобки
       result = result.replace(/\x00/g, '[').replace(/\x01/g, ']');

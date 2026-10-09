@@ -6,10 +6,10 @@ body {
 }
 
 .field-example {
-  font-size: 12px;
+  font-size: 10px;
   color: var(--text-secondary);
-  margin-top: 4px;
-  padding: 4px 8px;
+  margin-top: 0;
+  padding: 2px 6px;
   background: var(--bg-tertiary);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);

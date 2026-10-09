@@ -24,11 +24,17 @@ function updateCustomFormatExample() {
   const customFormat = document.getElementById('custom-toc-format').value;
   const hideChapterName = document.getElementById('hide-chapter-name').checked;
   const hideVolumeNumber = document.getElementById('hide-volume-number').checked;
-  const exampleElement = document.getElementById('custom-toc-format-example');
+  const exampleWithName = document.getElementById('custom-toc-format-example-with-name');
+  const exampleWithoutName = document.getElementById('custom-toc-format-example-without-name');
 
-  if (exampleElement && typeof formatChapterTitle === 'function') {
+  if (exampleWithName && typeof formatChapterTitle === 'function') {
     const example = formatChapterTitle('4', '31', 'Ёрико', 'custom', customFormat, hideChapterName, hideVolumeNumber);
-    exampleElement.textContent = example;
+    exampleWithName.textContent = example;
+  }
+
+  if (exampleWithoutName && typeof formatChapterTitle === 'function') {
+    const example = formatChapterTitle('4', '31', '', 'custom', customFormat, hideChapterName, hideVolumeNumber);
+    exampleWithoutName.textContent = example;
   }
 }
 
