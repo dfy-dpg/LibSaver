@@ -251,6 +251,7 @@ function applySettingsToUI(settings) {
   // Show/hide site menu links based on checkbox
   updateSiteMenuLinksVisibility();
   document.getElementById('debug-logging').checked = settings.debugLogging || false;
+  document.getElementById('update-notifications').checked = settings.updateNotifications ?? true;
   document.getElementById('generate-comicinfo').checked = settings.generateComicInfo !== false;
 
   // Chapters pagination settings
@@ -572,6 +573,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     'enableSiteMenu',
     'customSiteLinks',
     'debugLogging',
+    'updateNotifications',
     'generateComicInfo',
     'tocFormat',
     'customTocFormat',
@@ -799,6 +801,7 @@ document.getElementById('btn-save').addEventListener('click', async () => {
       animelib: document.getElementById('site-animelib').value.trim() || defaultSiteLinks.animelib
     },
     debugLogging: document.getElementById('debug-logging').checked,
+    updateNotifications: document.getElementById('update-notifications').checked,
     generateComicInfo: document.getElementById('generate-comicinfo').checked,
     tocFormat: document.getElementById('toc-format').value,
     customTocFormat: document.getElementById('custom-toc-format').value,
@@ -858,8 +861,9 @@ document.getElementById('btn-save').addEventListener('click', async () => {
 // Дефолтные значения по группам
 const DEFAULT_SETTINGS_BY_GROUP = {
   general: {
-    'enable-site-menu': false,
-    'debug-logging': false
+    'enable-site-menu': true,
+    'debug-logging': false,
+    'update-notifications': true
   },
   images: {
     'cover-quality': 'ORIGINAL',
@@ -1098,7 +1102,7 @@ document.getElementById('btn-reset').addEventListener('click', async () => {
     enableCoverEditor: true,
     enableChaptersEditor: true,
     disableToc: false,
-    enableSiteMenu: false,
+    enableSiteMenu: true,
     customSiteLinks: {
       mangalib: 'https://mangalib.me',
       hentailib: 'https://hentailib.me',
@@ -1107,6 +1111,7 @@ document.getElementById('btn-reset').addEventListener('click', async () => {
       animelib: 'https://animelib.org'
     },
     debugLogging: false,
+    updateNotifications: true,
     tocFormat: 'default',
     customTocFormat: '~ [Том {vol}] ~ [Глава {num}] ~ [{name}] ~',
     hideChapterName: false,
@@ -1179,6 +1184,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// Сравнение версий (semver)
+function compareVersions(v1, v2) {
+  const parts1 = v1.split('.').map(Number);
+  const parts2 = v2.split('.').map(Number);
+
+  const maxLength = Math.max(parts1.length, parts2.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const num1 = parts1[i] || 0;
+    const num2 = parts2[i] || 0;
+
+    if (num1 > num2) return 1;
+    if (num1 < num2) return -1;
+  }
+
+  return 0;
+}
+
 // Проверка обновлений
 async function checkForUpdates() {
   const versionElement = document.getElementById('extension-version');
@@ -1188,11 +1211,20 @@ async function checkForUpdates() {
 
   versionElement.textContent = 'Проверка...';
   versionElement.style.color = '#999';
+  versionElement.style.pointerEvents = 'none';
 
   try {
     console.log('Текущая версия:', currentVersion);
 
-    const response = await fetch('https://api.github.com/repos/dfy-dpg/LibSaver/tags');
+    // Таймаут 30 секунд для fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    const response = await fetch('https://api.github.com/repos/dfy-dpg/LibSaver/tags', {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -1207,10 +1239,15 @@ async function checkForUpdates() {
 
     console.log('Версия на GitHub:', latestVersion);
 
-    if (latestVersion !== currentVersion) {
-      // Обновление доступно - показываем постоянно
-      versionElement.textContent = `LibSaver v${currentVersion} → v${latestVersion}`;
+    // Фейковая задержка 1 секунда после успешного ответа
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Семантическое сравнение версий
+    if (compareVersions(latestVersion, currentVersion) > 0) {
+      // Обновление доступно - показываем постоянно, кликабельно
+      versionElement.textContent = `v${currentVersion} → v${latestVersion}`;
       versionElement.style.color = '#4CAF50';
+      versionElement.style.pointerEvents = 'auto';
       console.log(`Доступно обновление: v${currentVersion} → v${latestVersion}`);
 
       // При клике открываем GitHub releases (последний релиз)
@@ -1218,7 +1255,7 @@ async function checkForUpdates() {
         chrome.tabs.create({ url: 'https://github.com/dfy-dpg/LibSaver/releases/latest' });
       };
     } else {
-      // Актуальная версия - показываем 4 секунды
+      // Актуальная версия - показываем 4 секунды, не кликабельно
       versionElement.textContent = 'Актуальная версия';
       versionElement.style.color = '#4CAF50';
       console.log('Расширение обновлено до последней версии');
@@ -1226,18 +1263,30 @@ async function checkForUpdates() {
       setTimeout(() => {
         versionElement.textContent = originalText;
         versionElement.style.color = '';
+        versionElement.style.pointerEvents = 'auto';
         versionElement.onclick = checkForUpdates;
       }, 4000);
     }
   } catch (error) {
-    // Ошибка - показываем 4 секунды
-    versionElement.textContent = 'Ошибка';
+    // Определяем тип ошибки для более информативного сообщения
+    let errorMessage = 'Ошибка';
+    if (error.name === 'AbortError') {
+      errorMessage = 'Таймаут';
+    } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      errorMessage = 'Нет соединения';
+    } else if (error.message.includes('HTTP 4')) {
+      errorMessage = 'GitHub недоступен';
+    }
+
+    // Ошибка - показываем 4 секунды, не кликабельно (без задержки)
+    versionElement.textContent = errorMessage;
     versionElement.style.color = '#f44336';
     console.error('Ошибка проверки обновлений:', error);
 
     setTimeout(() => {
       versionElement.textContent = originalText;
       versionElement.style.color = '';
+      versionElement.style.pointerEvents = 'auto';
       versionElement.onclick = checkForUpdates;
     }, 4000);
   }

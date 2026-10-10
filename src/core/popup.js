@@ -32,13 +32,46 @@ const windowNames = {
   'covers': 'Редактор обложек'
 };
 
+// Сравнение версий (semver)
+function compareVersions(v1, v2) {
+  const parts1 = v1.split('.').map(Number);
+  const parts2 = v2.split('.').map(Number);
+
+  const maxLength = Math.max(parts1.length, parts2.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const num1 = parts1[i] || 0;
+    const num2 = parts2[i] || 0;
+
+    if (num1 > num2) return 1;
+    if (num1 < num2) return -1;
+  }
+
+  return 0;
+}
+
 // Проверка обновлений в popup
 async function checkForUpdatesPopup() {
   try {
+    // Проверяем настройку уведомлений
+    const result = await chrome.storage.local.get(['updateNotifications']);
+    if (result.updateNotifications === false) {
+      console.log('Уведомления об обновлениях отключены');
+      return;
+    }
+
     const manifest = chrome.runtime.getManifest();
     const currentVersion = manifest.version;
 
-    const response = await fetch('https://api.github.com/repos/dfy-dpg/LibSaver/tags');
+    // Таймаут 30 секунд для fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    const response = await fetch('https://api.github.com/repos/dfy-dpg/LibSaver/tags', {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
     if (!response.ok) return;
 
     const tags = await response.json();
@@ -47,14 +80,15 @@ async function checkForUpdatesPopup() {
     const latestTag = tags[0].name;
     const latestVersion = latestTag.replace('v', '');
 
-    if (latestVersion !== currentVersion) {
+    // Семантическое сравнение версий
+    if (compareVersions(latestVersion, currentVersion) > 0) {
       console.log(`Доступно обновление: v${currentVersion} → v${latestVersion}`);
-      showToast('Доступно обновление!', 'update', 4000, () => {
+      showToast('Доступно обновление!', 'update', 8000, () => {
         chrome.tabs.create({ url: 'https://github.com/dfy-dpg/LibSaver/releases/latest' });
       });
     }
   } catch (error) {
-    console.error('Ошибка проверки обновлений:', error);
+    console.error('Ошибка проверки обновлений в popup:', error);
   }
 }
 
@@ -467,8 +501,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Загружаем SVG логотипы как inline
   await loadInlineSvg();
 
-  // Проверка обновлений при открытии popup
-  checkForUpdatesPopup();
+  // Проверка обновлений при открытии popup (с задержкой 2 секунды)
+  setTimeout(checkForUpdatesPopup, 2000);
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const activeTab = tabs[0];

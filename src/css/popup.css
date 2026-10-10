@@ -312,6 +312,10 @@ body {
   color: #4CAF50;
 }
 
+.toast.update:hover {
+  opacity: 0.8;
+}
+
 .toast i {
   font-size: 14px;
 }
