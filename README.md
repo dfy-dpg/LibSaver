@@ -2,8 +2,8 @@
 
 # ~ LibSaver ~
 
-![LICENSE](https://img.shields.io/github/license/dfy-dpg/LibSaver?style=flat-square&label=License&color=BD0000)
-![RELEASE](https://img.shields.io/github/v/release/dfy-dpg/LibSaver?sort=date&display_name=tag&style=flat-square&label=Release)
+[![LICENSE](https://img.shields.io/github/license/dfy-dpg/LibSaver?style=flat-square&label=License&color=BD0000)](https://github.com/dfy-dpg/LibSaver/blob/main/LICENSE)
+[![RELEASE](https://img.shields.io/github/v/release/dfy-dpg/LibSaver?sort=date&display_name=tag&style=flat-square&label=Release)](https://github.com/dfy-dpg/LibSaver/releases/latest)
 
 ![MangaLIB](https://img.shields.io/badge/MangaLIB-ef6c00?style=flat-square)
 ![HentaiLIB](https://img.shields.io/badge/HentaiLIB-b71c1c?style=flat-square)
