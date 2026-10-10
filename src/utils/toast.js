@@ -8,11 +8,13 @@ const TOAST_HEIGHT = 24; // Высота одного toast + отступ
 const TOAST_GAP = 8; // Отступ между toast
 
 // Показать toast уведомление
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', duration = 1200, onClick = null) {
   const toast = {
     message,
     type,
-    id: Date.now()
+    id: Date.now(),
+    duration,
+    onClick
   };
 
   // Ограничиваем количество toast в очереди
@@ -47,8 +49,20 @@ function createToastElement(toastData) {
   toast.className = `toast ${toastData.type}`;
   toast.id = `toast-${toastData.id}`;
 
-  const icon = toastData.type === 'success' ? 'fa-check' : 'fa-xmark';
+  let icon = 'fa-check';
+  if (toastData.type === 'error') icon = 'fa-xmark';
+  if (toastData.type === 'update') icon = 'fa-download';
+
   toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${toastData.message}</span>`;
+
+  // Если есть onClick, делаем кликабельным
+  if (toastData.onClick) {
+    toast.style.cursor = 'pointer';
+    toast.addEventListener('click', () => {
+      toastData.onClick();
+      hideToast(toast);
+    });
+  }
 
   container.appendChild(toast);
 
@@ -72,10 +86,11 @@ function createToastElement(toastData) {
   // Показываем toast
   toast.classList.add('show');
 
-  // Автоматически скрываем через 2 секунды и сохраняем ссылку на таймер
+  // Автоматически скрываем через duration или 2 секунды по умолчанию
+  const duration = toastData.duration || 1200;
   const timer = setTimeout(() => {
     hideToast(toast);
-  }, 1200);
+  }, duration);
   toastTimers.set(toast.id, timer);
 }
 

@@ -179,7 +179,7 @@ chrome.runtime.onStartup.addListener(async () => {
     '*://*.shlib.life/*/manga/*',
     '*://*.animelib.org/*/anime/*'
   ];
-  
+
   for (const pattern of patterns) {
     const tabs = await chrome.tabs.query({ url: pattern });
     await reloadTabsSequentially(tabs);

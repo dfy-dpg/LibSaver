@@ -15,6 +15,15 @@ body {
   border: 1px solid var(--border-color);
 }
 
+.clickable-version {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clickable-version:hover {
+  opacity: 0.8;
+}
+
 .container {
   gap: 12px;
   max-width: 600px;

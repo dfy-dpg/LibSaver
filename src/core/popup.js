@@ -32,6 +32,32 @@ const windowNames = {
   'covers': 'Редактор обложек'
 };
 
+// Проверка обновлений в popup
+async function checkForUpdatesPopup() {
+  try {
+    const manifest = chrome.runtime.getManifest();
+    const currentVersion = manifest.version;
+
+    const response = await fetch('https://api.github.com/repos/dfy-dpg/LibSaver/tags');
+    if (!response.ok) return;
+
+    const tags = await response.json();
+    if (!tags || tags.length === 0) return;
+
+    const latestTag = tags[0].name;
+    const latestVersion = latestTag.replace('v', '');
+
+    if (latestVersion !== currentVersion) {
+      console.log(`Доступно обновление: v${currentVersion} → v${latestVersion}`);
+      showToast('Доступно обновление!', 'update', 4000, () => {
+        chrome.tabs.create({ url: 'https://github.com/dfy-dpg/LibSaver/releases/latest' });
+      });
+    }
+  } catch (error) {
+    console.error('Ошибка проверки обновлений:', error);
+  }
+}
+
 // Функция для сканирования реально открытых окон и обновления storage
 async function syncOpenWindows() {
   const windows = await chrome.windows.getAll({ populate: true });
@@ -437,10 +463,13 @@ async function loadInlineSvg() {
 document.addEventListener('DOMContentLoaded', async () => {
   // Загружаем и применяем тему
   await loadAndApplyTheme();
-  
+
   // Загружаем SVG логотипы как inline
   await loadInlineSvg();
-  
+
+  // Проверка обновлений при открытии popup
+  checkForUpdatesPopup();
+
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const activeTab = tabs[0];
     if (!activeTab || !activeTab.url) {

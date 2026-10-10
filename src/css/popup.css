@@ -304,6 +304,14 @@ body {
   color: #ff9800;
 }
 
+.toast.update {
+  border-color: #4CAF50;
+}
+
+.toast.update i {
+  color: #4CAF50;
+}
+
 .toast i {
   font-size: 14px;
 }

@@ -16,6 +16,7 @@ function displayVersion() {
   const versionElement = document.getElementById('extension-version');
   if (versionElement) {
     versionElement.textContent = `LibSaver v${manifest.version}`;
+    versionElement.onclick = checkForUpdates;
   }
 }
 
@@ -1177,6 +1178,73 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     applyTheme(message.theme);
   }
 });
+
+// Проверка обновлений
+async function checkForUpdates() {
+  const versionElement = document.getElementById('extension-version');
+  const manifest = chrome.runtime.getManifest();
+  const currentVersion = manifest.version;
+  const originalText = `LibSaver v${currentVersion}`;
+
+  versionElement.textContent = 'Проверка...';
+  versionElement.style.color = '#999';
+
+  try {
+    console.log('Текущая версия:', currentVersion);
+
+    const response = await fetch('https://api.github.com/repos/dfy-dpg/LibSaver/tags');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const tags = await response.json();
+    if (!tags || tags.length === 0) {
+      throw new Error('Нет тегов');
+    }
+
+    const latestTag = tags[0].name;
+    const latestVersion = latestTag.replace('v', '');
+
+    console.log('Версия на GitHub:', latestVersion);
+
+    if (latestVersion !== currentVersion) {
+      // Обновление доступно - показываем постоянно
+      versionElement.textContent = `LibSaver v${currentVersion} → v${latestVersion}`;
+      versionElement.style.color = '#4CAF50';
+      console.log(`Доступно обновление: v${currentVersion} → v${latestVersion}`);
+
+      // При клике открываем GitHub releases (последний релиз)
+      versionElement.onclick = () => {
+        chrome.tabs.create({ url: 'https://github.com/dfy-dpg/LibSaver/releases/latest' });
+      };
+    } else {
+      // Актуальная версия - показываем 4 секунды
+      versionElement.textContent = 'Актуальная версия';
+      versionElement.style.color = '#4CAF50';
+      console.log('Расширение обновлено до последней версии');
+
+      setTimeout(() => {
+        versionElement.textContent = originalText;
+        versionElement.style.color = '';
+        versionElement.onclick = checkForUpdates;
+      }, 4000);
+    }
+  } catch (error) {
+    // Ошибка - показываем 4 секунды
+    versionElement.textContent = 'Ошибка';
+    versionElement.style.color = '#f44336';
+    console.error('Ошибка проверки обновлений:', error);
+
+    setTimeout(() => {
+      versionElement.textContent = originalText;
+      versionElement.style.color = '';
+      versionElement.onclick = checkForUpdates;
+    }, 4000);
+  }
+}
+
+// Клик по версии для проверки обновлений
+document.getElementById('extension-version').addEventListener('click', checkForUpdates);
 
 // Инициализируем после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
