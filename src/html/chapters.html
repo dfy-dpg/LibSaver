@@ -231,10 +231,7 @@
       border: 1px solid var(--border-color);
       border-radius: var(--border-radius);
       cursor: default;
-      transition: all 0.2s;
-    }
-    .translator-priority-item:active {
-      cursor: default;
+      transition: background-color 0.2s, border-color 0.2s;
     }
     .translator-priority-item:hover {
       background: rgba(255, 255, 255, 0.05);
@@ -273,7 +270,7 @@
       cursor: pointer;
       padding: var(--spacing-xs);
       border-radius: var(--border-radius);
-      transition: all 0.2s;
+      transition: opacity 0.15s, background-color 0.15s, color 0.15s, transform 0.1s;
       opacity: 0.5;
       font-size: 10px;
       width: 24px;

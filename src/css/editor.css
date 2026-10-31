@@ -64,14 +64,6 @@ body {
   text-wrap: balance;
 }
 
-.chapter-title:hover {
-  color: var(--text-primary);
-}
-
-.chapter-title:active {
-  cursor: default;
-  color: var(--text-primary);
-}
 
 .chapter-header {
   display: flex;

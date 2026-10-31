@@ -337,9 +337,10 @@ function getChapterVariantsById(chapterId) {
 function populateTranslators() {
   const card = document.getElementById('translator-card');
   const list = document.getElementById('translator-list');
+  if (!card || !list) return;
   card.querySelector('h4').firstChild.textContent = uniqueChapters[0]?.episode ? 'Озвучка ' : 'Перевод ';
   updatePriorityList(list);
-  card.style.display = list.children.length > 0 ? '' : 'none';
+  card.style.display = list.children.length > 1 ? '' : 'none';
 }
 
 // Загружаем и применяем тему
@@ -1160,8 +1161,8 @@ function moveTranslatorUp(listElement, item) {
   const prevItem = item.previousElementSibling;
   if (prevItem) {
     listElement.insertBefore(item, prevItem);
-    updatePriorityFromList(listElement);
     updateButtonStates(listElement);
+    updatePriorityFromList(listElement);
   }
 }
 
@@ -1169,8 +1170,8 @@ function moveTranslatorDown(listElement, item) {
   const nextItem = item.nextElementSibling;
   if (nextItem) {
     listElement.insertBefore(nextItem, item);
-    updatePriorityFromList(listElement);
     updateButtonStates(listElement);
+    updatePriorityFromList(listElement);
   }
 }
 
@@ -1192,11 +1193,13 @@ function updateButtonStates(listElement) {
           upBtn.style.display = 'none';
         } else {
           upBtn.style.visibility = 'hidden';
+          upBtn.style.pointerEvents = 'none';
           upBtn.style.cursor = 'default';
         }
       } else {
         upBtn.style.display = 'flex';
         upBtn.style.visibility = 'visible';
+        upBtn.style.pointerEvents = '';
         upBtn.style.cursor = 'pointer';
       }
     }
@@ -1206,11 +1209,13 @@ function updateButtonStates(listElement) {
           downBtn.style.display = 'none';
         } else {
           downBtn.style.visibility = 'hidden';
+          downBtn.style.pointerEvents = 'none';
           downBtn.style.cursor = 'default';
         }
       } else {
         downBtn.style.display = 'flex';
         downBtn.style.visibility = 'visible';
+        downBtn.style.pointerEvents = '';
         downBtn.style.cursor = 'pointer';
       }
     }

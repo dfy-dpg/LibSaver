@@ -418,3 +418,78 @@ test('renderSiteLinks: свои ссылки сайтов скрыты в нас
   ctx.enableSiteMenu = false;
   assert.doesNotMatch(ctx.renderSiteLinks('mangalib'), /my\.mangalib/);
 });
+
+test('populateTranslators: card is hidden if 0 or 1 translator, visible if 2 or more', () => {
+  const card = {
+    style: { display: 'none' },
+    querySelector(sel) {
+      if (sel === 'h4') return { firstChild: { textContent: '' } };
+      return null;
+    }
+  };
+  const list = {
+    children: [],
+    _innerHTML: '',
+    get innerHTML() { return this._innerHTML; },
+    set innerHTML(val) { this._innerHTML = val; if (val === '') this.children = []; },
+    appendChild(child) { this.children.push(child); return child; },
+    querySelectorAll() { return []; }
+  };
+
+  const ctx = vm.createContext({
+    console,
+    document: {
+      getElementById(id) {
+        if (id === 'translator-card') return card;
+        if (id === 'translator-list') return list;
+        return null;
+      },
+      createElement(tag) {
+        return {
+          className: '',
+          dataset: {},
+          textContent: '',
+          children: [],
+          style: {},
+          addEventListener() {},
+          appendChild(child) { this.children.push(child); return child; },
+          querySelector() { return null; },
+          querySelectorAll() { return []; }
+        };
+      }
+    }
+  });
+
+  vm.runInContext(source('src/core/chapter-range.js'), ctx);
+  vm.runInContext(functionSource('src/editors/chapters.js', 'updateButtonStates'), ctx);
+  vm.runInContext(functionSource('src/editors/chapters.js', 'updatePriorityList'), ctx);
+  vm.runInContext(functionSource('src/editors/chapters.js', 'populateTranslators'), ctx);
+
+  // 1. Only 1 translator -> hidden
+  ctx.uniqueChapters = [{ id: '1', number: '1' }];
+  ctx.allChapters = [
+    { id: '1', number: '1', branches: [{ branch_id: 1, teams: [{ id: 10, name: 'Team A' }] }] },
+    { id: '2', number: '2', branches: [{ branch_id: 1, teams: [{ id: 10, name: 'Team A' }] }] }
+  ];
+  ctx.translatorPriority = [];
+  ctx.populateTranslators();
+  assert.equal(list.children.length, 1);
+  assert.equal(card.style.display, 'none');
+
+  // 2. 2 translators -> visible
+  ctx.allChapters = [
+    { id: '1', number: '1', branches: [{ branch_id: 1, teams: [{ id: 10, name: 'Team A' }] }] },
+    { id: '2', number: '2', branches: [{ branch_id: 2, teams: [{ id: 20, name: 'Team B' }] }] }
+  ];
+  ctx.translatorPriority = [];
+  ctx.populateTranslators();
+  assert.equal(list.children.length, 2);
+  assert.equal(card.style.display, '');
+
+  // 3. 0 translators -> hidden
+  ctx.allChapters = [{ id: '1', number: '1' }];
+  ctx.translatorPriority = [];
+  ctx.populateTranslators();
+  assert.equal(list.children.length, 0);
+  assert.equal(card.style.display, 'none');
+});
